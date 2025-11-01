@@ -13,8 +13,11 @@ import Home from "./components/Home"
 import Profile from "./components/Profile"
 import CreatePost from "./components/CreatePost"
 
-// Set up axios defaults
-axios.defaults.baseURL = "http://localhost:5000/api"
+// ✅ Automatically switch backend based on environment
+axios.defaults.baseURL =
+  process.env.NODE_ENV === "production"
+    ? "https://connect-social.onrender.com/api"
+    : "http://localhost:5000/api"
 
 function App() {
   const [user, setUser] = useState(null)
@@ -29,9 +32,7 @@ function App() {
         }
         return config
       },
-      (error) => {
-        return Promise.reject(error)
-      },
+      (error) => Promise.reject(error)
     )
   }
 
@@ -56,16 +57,11 @@ function App() {
   }
 
   const logout = () => {
-    // Clear ALL stored data
+    // Clear stored data and axios headers
     localStorage.clear()
     sessionStorage.clear()
-
-    // Clear axios headers
     delete axios.defaults.headers.common["Authorization"]
-
-    // Clear user state
     setUser(null)
-
     console.log("User logged out - all data cleared")
   }
 
@@ -83,11 +79,26 @@ function App() {
         {user && <Navbar user={user} onLogout={logout} />}
 
         <Routes>
-          <Route path="/login" element={!user ? <Login onLogin={login} /> : <Navigate to="/" />} />
-          <Route path="/register" element={!user ? <Register onLogin={login} /> : <Navigate to="/" />} />
-          <Route path="/" element={user ? <Home user={user} /> : <Navigate to="/login" />} />
-          <Route path="/profile/:userId" element={user ? <Profile currentUser={user} /> : <Navigate to="/login" />} />
-          <Route path="/create-post" element={user ? <CreatePost user={user} /> : <Navigate to="/login" />} />
+          <Route
+            path="/login"
+            element={!user ? <Login onLogin={login} /> : <Navigate to="/" />}
+          />
+          <Route
+            path="/register"
+            element={!user ? <Register onLogin={login} /> : <Navigate to="/" />}
+          />
+          <Route
+            path="/"
+            element={user ? <Home user={user} /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/profile/:userId"
+            element={user ? <Profile currentUser={user} /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/create-post"
+            element={user ? <CreatePost user={user} /> : <Navigate to="/login" />}
+          />
         </Routes>
       </div>
     </Router>
