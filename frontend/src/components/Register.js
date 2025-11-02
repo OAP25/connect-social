@@ -15,8 +15,10 @@ const Register = ({ onLogin }) => {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
-  // ✅ Base API URL (from .env)
-  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL
+  // ✅ Works for both local & deployed
+  const API_BASE_URL =
+    process.env.REACT_APP_API_BASE_URL ||
+    "https://connect-social.onrender.com/api"
 
   const handleChange = (e) => {
     setFormData({
@@ -45,6 +47,7 @@ const Register = ({ onLogin }) => {
 
       onLogin(response.data.user, response.data.token)
     } catch (error) {
+      console.error("Registration Error:", error)
       setError(error.response?.data?.error || "Registration failed")
     } finally {
       setLoading(false)
@@ -54,7 +57,7 @@ const Register = ({ onLogin }) => {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h2>Join Social Media</h2>
+        <h2>Create Your Account</h2>
 
         {error && <div className="error-message">{error}</div>}
 
