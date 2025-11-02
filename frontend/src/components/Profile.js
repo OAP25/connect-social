@@ -6,7 +6,7 @@ import axios from "axios";
 import PostCard from "./PostCard";
 import "./Profile.css";
 
-const API = process.env.REACT_APP_API_URL; // ✅ Backend base URL
+const API = process.env.REACT_APP_API_BASE_URL || "https://connect-social.onrender.com/api";
 
 const Profile = ({ currentUser }) => {
   const { userId } = useParams();
@@ -16,10 +16,7 @@ const Profile = ({ currentUser }) => {
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState({
-    username: "",
-    bio: "",
-  });
+  const [editData, setEditData] = useState({ username: "", bio: "" });
 
   const isOwnProfile = userId === currentUser.id;
 
@@ -29,7 +26,7 @@ const Profile = ({ currentUser }) => {
 
   const fetchUserProfile = async () => {
     try {
-      const response = await axios.get(`${API}/api/users/${userId}`);
+      const response = await axios.get(`${API}/users/${userId}`);
       setUser(response.data.user);
       setPosts(response.data.posts);
       setStats(response.data.stats);
@@ -51,7 +48,7 @@ const Profile = ({ currentUser }) => {
 
   const handleFollow = async () => {
     try {
-      const response = await axios.post(`${API}/api/users/${userId}/follow`);
+      const response = await axios.post(`${API}/users/${userId}/follow`);
       setIsFollowing(response.data.following);
       setStats((prev) => ({
         ...prev,
@@ -65,7 +62,7 @@ const Profile = ({ currentUser }) => {
   const handleEditProfile = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.put(`${API}/api/users/profile`, editData);
+      const response = await axios.put(`${API}/users/profile`, editData);
       setUser(response.data.user);
       setIsEditing(false);
     } catch (error) {
@@ -75,7 +72,7 @@ const Profile = ({ currentUser }) => {
 
   const handleLike = async (postId) => {
     try {
-      const response = await axios.post(`${API}/api/posts/${postId}/like`);
+      const response = await axios.post(`${API}/posts/${postId}/like`);
       setPosts(
         posts.map((post) =>
           post._id === postId
@@ -95,7 +92,7 @@ const Profile = ({ currentUser }) => {
 
   const handleComment = async (postId, content) => {
     try {
-      const response = await axios.post(`${API}/api/posts/${postId}/comments`, {
+      const response = await axios.post(`${API}/posts/${postId}/comments`, {
         content,
       });
       setPosts(
@@ -131,10 +128,7 @@ const Profile = ({ currentUser }) => {
         <div className="profile-info">
           <div className="avatar-large">
             {user.avatar ? (
-              <img
-                src={user.avatar || "/placeholder.svg"}
-                alt={user.username}
-              />
+              <img src={user.avatar || "/placeholder.svg"} alt={user.username} />
             ) : (
               <div className="avatar-placeholder">
                 {user.username.charAt(0).toUpperCase()}

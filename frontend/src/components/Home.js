@@ -11,7 +11,8 @@ const Home = ({ user }) => {
   const [hasMore, setHasMore] = useState(true)
 
   // ✅ Use environment variable for backend URL
-  const API_BASE = process.env.REACT_APP_API_URL
+  const API_BASE = process.env.REACT_APP_API_BASE_URL || "https://connect-social.onrender.com/api";
+
 
   useEffect(() => {
     fetchPosts()
