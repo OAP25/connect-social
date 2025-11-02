@@ -1,76 +1,81 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useParams } from "react-router-dom"
-import axios from "axios"
-import PostCard from "./PostCard"
-import "./Profile.css"
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import PostCard from "./PostCard";
+import "./Profile.css";
+
+const API = process.env.REACT_APP_API_URL; // ✅ Backend base URL
 
 const Profile = ({ currentUser }) => {
-  const { userId } = useParams()
-  const [user, setUser] = useState(null)
-  const [posts, setPosts] = useState([])
-  const [stats, setStats] = useState({})
-  const [loading, setLoading] = useState(true)
-  const [isFollowing, setIsFollowing] = useState(false)
-  const [isEditing, setIsEditing] = useState(false)
+  const { userId } = useParams();
+  const [user, setUser] = useState(null);
+  const [posts, setPosts] = useState([]);
+  const [stats, setStats] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
     username: "",
     bio: "",
-  })
+  });
 
-  const isOwnProfile = userId === currentUser.id
+  const isOwnProfile = userId === currentUser.id;
 
   useEffect(() => {
-    fetchUserProfile()
-  }, [userId])
+    fetchUserProfile();
+  }, [userId]);
 
   const fetchUserProfile = async () => {
     try {
-      const response = await axios.get(`/users/${userId}`)
-      setUser(response.data.user)
-      setPosts(response.data.posts)
-      setStats(response.data.stats)
-      setIsFollowing(response.data.user.followers.some((follower) => follower._id === currentUser.id))
+      const response = await axios.get(`${API}/api/users/${userId}`);
+      setUser(response.data.user);
+      setPosts(response.data.posts);
+      setStats(response.data.stats);
+      setIsFollowing(
+        response.data.user.followers.some(
+          (follower) => follower._id === currentUser.id
+        )
+      );
       setEditData({
         username: response.data.user.username,
         bio: response.data.user.bio,
-      })
+      });
     } catch (error) {
-      console.error("Error fetching profile:", error)
+      console.error("Error fetching profile:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleFollow = async () => {
     try {
-      const response = await axios.post(`/users/${userId}/follow`)
-      setIsFollowing(response.data.following)
+      const response = await axios.post(`${API}/api/users/${userId}/follow`);
+      setIsFollowing(response.data.following);
       setStats((prev) => ({
         ...prev,
         followersCount: response.data.followersCount,
-      }))
+      }));
     } catch (error) {
-      console.error("Error following user:", error)
+      console.error("Error following user:", error);
     }
-  }
+  };
 
   const handleEditProfile = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      const response = await axios.put("/users/profile", editData)
-      setUser(response.data.user)
-      setIsEditing(false)
+      const response = await axios.put(`${API}/api/users/profile`, editData);
+      setUser(response.data.user);
+      setIsEditing(false);
     } catch (error) {
-      console.error("Error updating profile:", error)
+      console.error("Error updating profile:", error);
     }
-  }
+  };
 
   const handleLike = async (postId) => {
     try {
-      const response = await axios.post(`/posts/${postId}/like`)
-
+      const response = await axios.post(`${API}/api/posts/${postId}/like`);
       setPosts(
         posts.map((post) =>
           post._id === postId
@@ -80,38 +85,44 @@ const Profile = ({ currentUser }) => {
                   ? [...post.likes, currentUser.id]
                   : post.likes.filter((id) => id !== currentUser.id),
               }
-            : post,
-        ),
-      )
+            : post
+        )
+      );
     } catch (error) {
-      console.error("Error liking post:", error)
+      console.error("Error liking post:", error);
     }
-  }
+  };
 
   const handleComment = async (postId, content) => {
     try {
-      const response = await axios.post(`/posts/${postId}/comments`, { content })
-
+      const response = await axios.post(`${API}/api/posts/${postId}/comments`, {
+        content,
+      });
       setPosts(
         posts.map((post) =>
-          post._id === postId ? { ...post, comments: [...post.comments, response.data.comment] } : post,
-        ),
-      )
+          post._id === postId
+            ? {
+                ...post,
+                comments: [...post.comments, response.data.comment],
+              }
+            : post
+        )
+      );
     } catch (error) {
-      console.error("Error adding comment:", error)
+      console.error("Error adding comment:", error);
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="loading-container">
         <div className="loading-spinner"></div>
       </div>
-    )
+    );
   }
 
   if (!user) {
-    return <div className="error-message">User not found</div>
+    return <div className="error-message">User not found</div>;
   }
 
   return (
@@ -120,9 +131,14 @@ const Profile = ({ currentUser }) => {
         <div className="profile-info">
           <div className="avatar-large">
             {user.avatar ? (
-              <img src={user.avatar || "/placeholder.svg"} alt={user.username} />
+              <img
+                src={user.avatar || "/placeholder.svg"}
+                alt={user.username}
+              />
             ) : (
-              <div className="avatar-placeholder">{user.username.charAt(0).toUpperCase()}</div>
+              <div className="avatar-placeholder">
+                {user.username.charAt(0).toUpperCase()}
+              </div>
             )}
           </div>
 
@@ -147,11 +163,17 @@ const Profile = ({ currentUser }) => {
 
             <div className="profile-actions">
               {isOwnProfile ? (
-                <button onClick={() => setIsEditing(true)} className="edit-profile-btn">
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="edit-profile-btn"
+                >
                   Edit Profile
                 </button>
               ) : (
-                <button onClick={handleFollow} className={`follow-btn ${isFollowing ? "following" : ""}`}>
+                <button
+                  onClick={handleFollow}
+                  className={`follow-btn ${isFollowing ? "following" : ""}`}
+                >
                   {isFollowing ? "Unfollow" : "Follow"}
                 </button>
               )}
@@ -170,14 +192,18 @@ const Profile = ({ currentUser }) => {
                 <input
                   type="text"
                   value={editData.username}
-                  onChange={(e) => setEditData({ ...editData, username: e.target.value })}
+                  onChange={(e) =>
+                    setEditData({ ...editData, username: e.target.value })
+                  }
                 />
               </div>
               <div className="form-group">
                 <label>Bio</label>
                 <textarea
                   value={editData.bio}
-                  onChange={(e) => setEditData({ ...editData, bio: e.target.value })}
+                  onChange={(e) =>
+                    setEditData({ ...editData, bio: e.target.value })
+                  }
                   rows="3"
                 />
               </div>
@@ -196,7 +222,11 @@ const Profile = ({ currentUser }) => {
         <h3>Posts ({stats.postsCount})</h3>
         {posts.length === 0 ? (
           <div className="no-posts">
-            <p>{isOwnProfile ? "You haven't posted anything yet" : "No posts yet"}</p>
+            <p>
+              {isOwnProfile
+                ? "You haven't posted anything yet"
+                : "No posts yet"}
+            </p>
           </div>
         ) : (
           <div className="posts-grid">
@@ -213,7 +243,7 @@ const Profile = ({ currentUser }) => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Profile
+export default Profile;

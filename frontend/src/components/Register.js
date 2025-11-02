@@ -15,6 +15,9 @@ const Register = ({ onLogin }) => {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
+  // ✅ Base API URL (from .env)
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -34,11 +37,12 @@ const Register = ({ onLogin }) => {
     }
 
     try {
-      const response = await axios.post("/auth/register", {
+      const response = await axios.post(`${API_BASE_URL}/auth/register`, {
         username: formData.username,
         email: formData.email,
         password: formData.password,
       })
+
       onLogin(response.data.user, response.data.token)
     } catch (error) {
       setError(error.response?.data?.error || "Registration failed")

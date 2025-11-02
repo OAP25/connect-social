@@ -1,39 +1,40 @@
-"use client"
-
-import { useState } from "react"
-import { Link } from "react-router-dom"
-import axios from "axios"
-import "./Auth.css"
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import axios from "axios";
+import "./Auth.css";
 
 const Login = ({ onLogin }) => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-  })
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
+  });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
-    })
-  }
+    });
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError("")
+    e.preventDefault();
+    setLoading(true);
+    setError("");
 
     try {
-      const response = await axios.post("/auth/login", formData)
-      onLogin(response.data.user, response.data.token)
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/auth/login`,
+        formData
+      );
+      onLogin(response.data.user, response.data.token);
     } catch (error) {
-      setError(error.response?.data?.error || "Login failed")
+      setError(error.response?.data?.error || "Login failed");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="auth-container">
@@ -71,11 +72,11 @@ const Login = ({ onLogin }) => {
         </form>
 
         <p className="auth-link">
-          Don't have an account? <Link to="/register">Register here</Link>
+          Don’t have an account? <Link to="/register">Register here</Link>
         </p>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;

@@ -1,38 +1,38 @@
-"use client"
-
-import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
-import axios from "axios"
-import "./Navbar.css"
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import "./Navbar.css";
 
 const Navbar = ({ user, onLogout }) => {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [searchResults, setSearchResults] = useState([])
-  const [showSearchResults, setShowSearchResults] = useState(false)
-  const navigate = useNavigate()
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const navigate = useNavigate();
 
   const handleSearch = async (query) => {
-    setSearchQuery(query)
+    setSearchQuery(query);
 
     if (query.trim().length > 2) {
       try {
-        const response = await axios.get(`/users/search/${query}`)
-        setSearchResults(response.data)
-        setShowSearchResults(true)
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/users/search/${query}`
+        );
+        setSearchResults(response.data);
+        setShowSearchResults(true);
       } catch (error) {
-        console.error("Search error:", error)
+        console.error("Search error:", error);
       }
     } else {
-      setSearchResults([])
-      setShowSearchResults(false)
+      setSearchResults([]);
+      setShowSearchResults(false);
     }
-  }
+  };
 
   const handleUserClick = (userId) => {
-    setSearchQuery("")
-    setShowSearchResults(false)
-    navigate(`/profile/${userId}`)
-  }
+    setSearchQuery("");
+    setShowSearchResults(false);
+    navigate(`/profile/${userId}`);
+  };
 
   return (
     <nav className="navbar">
@@ -60,9 +60,14 @@ const Navbar = ({ user, onLogout }) => {
                 >
                   <div className="avatar-small">
                     {searchUser.avatar ? (
-                      <img src={searchUser.avatar || "/placeholder.svg"} alt={searchUser.username} />
+                      <img
+                        src={searchUser.avatar || "/placeholder.svg"}
+                        alt={searchUser.username}
+                      />
                     ) : (
-                      <div className="avatar-placeholder">{searchUser.username.charAt(0).toUpperCase()}</div>
+                      <div className="avatar-placeholder">
+                        {searchUser.username.charAt(0).toUpperCase()}
+                      </div>
                     )}
                   </div>
                   <span>{searchUser.username}</span>
@@ -85,7 +90,7 @@ const Navbar = ({ user, onLogout }) => {
         </div>
       </div>
     </nav>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;

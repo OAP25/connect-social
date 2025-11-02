@@ -1,30 +1,30 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Link } from "react-router-dom"
-import "./PostCard.css"
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import "./PostCard.css";
 
 const PostCard = ({ post, currentUser, onLike, onComment }) => {
-  const [showComments, setShowComments] = useState(false)
-  const [newComment, setNewComment] = useState("")
-  const [isCommenting, setIsCommenting] = useState(false)
+  const [showComments, setShowComments] = useState(false);
+  const [newComment, setNewComment] = useState("");
+  const [isCommenting, setIsCommenting] = useState(false);
 
-  const isLiked = post.likes.includes(currentUser.id)
-  const isOwner = post.author._id === currentUser.id
+  const isLiked = post.likes.includes(currentUser.id);
+  const isOwner = post.author._id === currentUser.id;
 
   const handleLike = () => {
-    onLike(post._id)
-  }
+    onLike(post._id);
+  };
 
   const handleCommentSubmit = async (e) => {
-    e.preventDefault()
-    if (!newComment.trim()) return
+    e.preventDefault();
+    if (!newComment.trim()) return;
 
-    setIsCommenting(true)
-    await onComment(post._id, newComment)
-    setNewComment("")
-    setIsCommenting(false)
-  }
+    setIsCommenting(true);
+    await onComment(post._id, newComment);
+    setNewComment("");
+    setIsCommenting(false);
+  };
 
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString("en-US", {
@@ -33,8 +33,15 @@ const PostCard = ({ post, currentUser, onLike, onComment }) => {
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    })
-  }
+    });
+  };
+
+  // ✅ Production-safe image URL builder
+  const getImageUrl = (path) => {
+    if (!path) return null;
+    if (path.startsWith("http")) return path;
+    return `${process.env.REACT_APP_API_URL}${path}`;
+  };
 
   return (
     <div className="post-card">
@@ -42,9 +49,14 @@ const PostCard = ({ post, currentUser, onLike, onComment }) => {
         <div className="post-author">
           <div className="avatar">
             {post.author.avatar ? (
-              <img src={post.author.avatar || "/placeholder.svg"} alt={post.author.username} />
+              <img
+                src={post.author.avatar || "/placeholder.svg"}
+                alt={post.author.username}
+              />
             ) : (
-              <div className="avatar-placeholder">{post.author.username.charAt(0).toUpperCase()}</div>
+              <div className="avatar-placeholder">
+                {post.author.username.charAt(0).toUpperCase()}
+              </div>
             )}
           </div>
           <div className="author-info">
@@ -61,11 +73,11 @@ const PostCard = ({ post, currentUser, onLike, onComment }) => {
         {post.image && (
           <div className="post-image">
             <img
-              src={post.image.startsWith("http") ? post.image : `http://localhost:5000${post.image}`}
+              src={getImageUrl(post.image)}
               alt="Post content"
               onError={(e) => {
-                console.error("Image failed to load:", post.image)
-                e.target.style.display = "none"
+                console.error("Image failed to load:", post.image);
+                e.target.style.display = "none";
               }}
             />
           </div>
@@ -73,12 +85,18 @@ const PostCard = ({ post, currentUser, onLike, onComment }) => {
       </div>
 
       <div className="post-actions">
-        <button className={`action-btn like-btn ${isLiked ? "liked" : ""}`} onClick={handleLike}>
+        <button
+          className={`action-btn like-btn ${isLiked ? "liked" : ""}`}
+          onClick={handleLike}
+        >
           <span className="icon">❤️</span>
           <span>{post.likes.length}</span>
         </button>
 
-        <button className="action-btn comment-btn" onClick={() => setShowComments(!showComments)}>
+        <button
+          className="action-btn comment-btn"
+          onClick={() => setShowComments(!showComments)}
+        >
           <span className="icon">💬</span>
           <span>{post.comments.length}</span>
         </button>
@@ -94,7 +112,10 @@ const PostCard = ({ post, currentUser, onLike, onComment }) => {
               onChange={(e) => setNewComment(e.target.value)}
               disabled={isCommenting}
             />
-            <button type="submit" disabled={isCommenting || !newComment.trim()}>
+            <button
+              type="submit"
+              disabled={isCommenting || !newComment.trim()}
+            >
               {isCommenting ? "Posting..." : "Post"}
             </button>
           </form>
@@ -104,7 +125,9 @@ const PostCard = ({ post, currentUser, onLike, onComment }) => {
               <div key={index} className="comment">
                 <div className="comment-author">
                   <strong>{comment.author?.username || "User"}</strong>
-                  <span className="comment-date">{formatDate(comment.createdAt)}</span>
+                  <span className="comment-date">
+                    {formatDate(comment.createdAt)}
+                  </span>
                 </div>
                 <p className="comment-content">{comment.content}</p>
               </div>
@@ -113,7 +136,7 @@ const PostCard = ({ post, currentUser, onLike, onComment }) => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default PostCard
+export default PostCard;

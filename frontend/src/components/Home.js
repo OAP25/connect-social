@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import axios from "axios"
 import PostCard from "./PostCard"
@@ -12,13 +10,16 @@ const Home = ({ user }) => {
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
 
+  // ✅ Use environment variable for backend URL
+  const API_BASE = process.env.REACT_APP_API_URL
+
   useEffect(() => {
     fetchPosts()
   }, [])
 
   const fetchPosts = async (pageNum = 1) => {
     try {
-      const response = await axios.get(`/posts?page=${pageNum}&limit=10`)
+      const response = await axios.get(`${API_BASE}/posts?page=${pageNum}&limit=10`)
 
       if (pageNum === 1) {
         setPosts(response.data.posts)
@@ -36,22 +37,27 @@ const Home = ({ user }) => {
   }
 
   const handlePostCreated = () => {
-    fetchPosts(1) // Refresh posts
+    fetchPosts(1) // Refresh posts after creating new one
   }
 
   const handleLike = async (postId) => {
     try {
-      const response = await axios.post(`/posts/${postId}/like`)
+      const token = localStorage.getItem("token")
+      const response = await axios.post(`${API_BASE}/posts/${postId}/like`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
 
       setPosts(
         posts.map((post) =>
           post._id === postId
             ? {
                 ...post,
-                likes: response.data.liked ? [...post.likes, user.id] : post.likes.filter((id) => id !== user.id),
+                likes: response.data.liked
+                  ? [...post.likes, user.id]
+                  : post.likes.filter((id) => id !== user.id),
               }
-            : post,
-        ),
+            : post
+        )
       )
     } catch (error) {
       console.error("Error liking post:", error)
@@ -60,12 +66,19 @@ const Home = ({ user }) => {
 
   const handleComment = async (postId, content) => {
     try {
-      const response = await axios.post(`/posts/${postId}/comments`, { content })
+      const token = localStorage.getItem("token")
+      const response = await axios.post(
+        `${API_BASE}/posts/${postId}/comments`,
+        { content },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
 
       setPosts(
         posts.map((post) =>
-          post._id === postId ? { ...post, comments: [...post.comments, response.data.comment] } : post,
-        ),
+          post._id === postId
+            ? { ...post, comments: [...post.comments, response.data.comment] }
+            : post
+        )
       )
     } catch (error) {
       console.error("Error adding comment:", error)
@@ -99,7 +112,13 @@ const Home = ({ user }) => {
             </div>
           ) : (
             posts.map((post) => (
-              <PostCard key={post._id} post={post} currentUser={user} onLike={handleLike} onComment={handleComment} />
+              <PostCard
+                key={post._id}
+                post={post}
+                currentUser={user}
+                onLike={handleLike}
+                onComment={handleComment}
+              />
             ))
           )}
 
